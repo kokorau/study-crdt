@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import VisualizeMyersDiff from "./components/VisualizeMyersDiff.vue";
+import VisualizeMyersDiff from "./components/MyersDiff/VisualizeMyersDiff.vue";
 import { $Patch } from "./myers-diff";
 
 const before = ref("kitten");

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { GridInfo, GridCell, PathSegment, EditStep } from "../types/diff";
+import type { GridInfo, GridCell, PathSegment, EditStep } from "./diff";
 import ArrowMarkers from "./svg/ArrowMarkers.vue";
 
 interface Props {

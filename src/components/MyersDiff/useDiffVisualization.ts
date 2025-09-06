@@ -1,6 +1,6 @@
 import { computed, type Ref } from "vue";
-import type { Patch } from "../myers-diff";
-import type { GridInfo, GridCell, EditStep, PathSegment } from "../types/diff";
+import type { Patch } from "../../myers-diff";
+import type { GridInfo, GridCell, EditStep, PathSegment } from "./diff";
 
 export function useDiffVisualization(patch: Ref<Patch>) {
   // Apply patch to get the result string
