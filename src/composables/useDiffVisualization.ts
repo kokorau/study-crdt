@@ -10,7 +10,10 @@ export function useDiffVisualization(patch: Ref<Patch>) {
 
     for (const span of patch.value.spans) {
       if (span.type === "retain") {
-        result += patch.value.baseVersion.slice(position, position + span.count);
+        result += patch.value.baseVersion.slice(
+          position,
+          position + span.count,
+        );
         position += span.count;
       } else if (span.type === "delete") {
         position += span.count;
@@ -45,7 +48,10 @@ export function useDiffVisualization(patch: Ref<Patch>) {
 
     for (const span of patch.value.spans) {
       if (span.type === "retain") {
-        result += patch.value.baseVersion.slice(position, position + span.count);
+        result += patch.value.baseVersion.slice(
+          position,
+          position + span.count,
+        );
         position += span.count;
       } else if (span.type === "delete") {
         // Don't add deleted content to result, just move position
@@ -83,7 +89,6 @@ export function useDiffVisualization(patch: Ref<Patch>) {
   // Calculate the edit path for visualization
   const editPath = computed<EditStep[]>(() => {
     const before = patch.value.baseVersion;
-    const after = applyPatch();
     const path: EditStep[] = [];
     let x = 0;
     let y = 0;
