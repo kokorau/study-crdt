@@ -1,5 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { $Patch, type Patch, type PatchDto } from "./Patch";
+import { $Span } from "./Span";
 
 describe("$Patch", () => {
   describe("create", () => {
@@ -282,6 +283,66 @@ describe("$Patch", () => {
       // Should retain "hello " and then handle the change
       const hasRetain = patch.spans.some((span) => span.type === "retain");
       expect(hasRetain).toBe(true);
+    });
+  });
+
+  describe("Path Optimality Verification", () => {
+    test("should verify optimal paths using isOptimalPath", () => {
+      const testCases = [
+        { before: "hello", after: "sitting" },
+        { before: "kitten", after: "sitting" },
+        { before: "abc", after: "aXbc" },
+        { before: "ABCDEFG", after: "A1B2C3DEFG" },
+        { before: "", after: "hello" },
+        { before: "hello", after: "" },
+        { before: "same", after: "same" },
+      ];
+
+      testCases.forEach(({ before, after }) => {
+        const patch = $Patch.createFromDiff(before, after);
+        expect($Patch.isOptimalPath(patch)).toBe(true);
+      });
+    });
+
+    test("should calculate correct edit distances", () => {
+      expect($Patch.getEditDistance("hello", "sitting")).toBe(12); // delete 5 + insert 7 = 12
+      expect($Patch.getEditDistance("kitten", "sitting")).toBe(5); // optimal transformations
+      expect($Patch.getEditDistance("abc", "aXbc")).toBe(1); // insert X
+      expect($Patch.getEditDistance("", "hello")).toBe(5); // insert 5 chars
+      expect($Patch.getEditDistance("hello", "")).toBe(5); // delete 5 chars
+      expect($Patch.getEditDistance("same", "same")).toBe(0); // no changes
+    });
+
+    test("should identify non-optimal patches", () => {
+      // Create a deliberately non-optimal patch
+      const inefficientPatch: Patch = {
+        baseVersion: "abc",
+        spans: [
+          { type: "delete", count: 1 }, // delete 'a'
+          { type: "insert", text: "a" }, // insert 'a' back
+          { type: "retain", count: 1 }, // retain 'b' 
+          { type: "insert", text: "X" }, // insert 'X'
+          { type: "retain", count: 1 }, // retain 'c'
+        ],
+      };
+
+      expect($Patch.isOptimalPath(inefficientPatch)).toBe(false);
+    });
+
+    test("should compare edit distances with theoretical minimum", () => {
+      const before = "The quick brown fox";
+      const after = "A quick red fox jumps";
+      
+      const patch = $Patch.createFromDiff(before, after);
+      const actualDistance = patch.spans.reduce((acc, span) => {
+        if ($Span.isDelete(span)) return acc + span.count;
+        if ($Span.isInsert(span)) return acc + span.text.length;
+        return acc;
+      }, 0);
+      
+      const theoreticalDistance = $Patch.getEditDistance(before, after);
+      expect(actualDistance).toBe(theoreticalDistance);
+      expect($Patch.isOptimalPath(patch)).toBe(true);
     });
   });
 });
