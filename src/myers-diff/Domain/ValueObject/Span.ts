@@ -6,6 +6,15 @@ type SpanInsert = { type: "insert"; text: string };
 export type Span = SpanRetain | SpanDelete | SpanInsert;
 
 export const $Span = {
+  createRetain(count: number): Readonly<SpanRetain> {
+    return Object.freeze({ type: "retain", count });
+  },
+  createDelete(count: number): Readonly<SpanDelete> {
+    return Object.freeze({ type: "delete", count });
+  },
+  createInsert(text: string): Readonly<SpanInsert> {
+    return Object.freeze({ type: "insert", text });
+  },
   isRetain(span: Span): span is SpanRetain {
     return span.type === "retain";
   },
@@ -15,10 +24,10 @@ export const $Span = {
   isInsert(span: Span): span is SpanInsert {
     return span.type === "insert";
   },
-  fromDto(dto: SpanDto): Span {
-    if ("r" in dto) return { type: "retain", count: dto.r };
-    if ("d" in dto) return { type: "delete", count: dto.d };
-    if ("i" in dto) return { type: "insert", text: dto.i };
+  fromDto(dto: SpanDto): Readonly<Span> {
+    if ("r" in dto) return $Span.createRetain(dto.r);
+    if ("d" in dto) return $Span.createDelete(dto.d);
+    if ("i" in dto) return $Span.createInsert(dto.i);
     throw new Error("Invalid span DTO");
   },
   toDto(span: Span): SpanDto {

@@ -177,4 +177,111 @@ describe("$Patch", () => {
       expect(backToPatch).toEqual(originalPatch);
     });
   });
+
+  describe("createFromDiff", () => {
+    test("should create patch for identical strings", () => {
+      const patch = $Patch.createFromDiff("hello", "hello");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello");
+    });
+
+    test("should create patch for empty to non-empty", () => {
+      const patch = $Patch.createFromDiff("", "hello");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello");
+    });
+
+    test("should create patch for non-empty to empty", () => {
+      const patch = $Patch.createFromDiff("hello", "");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("");
+    });
+
+    test("should create patch for simple substitution", () => {
+      const patch = $Patch.createFromDiff("cat", "bat");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("bat");
+    });
+
+    test("should create patch for insertion at beginning", () => {
+      const patch = $Patch.createFromDiff("world", "hello world");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello world");
+    });
+
+    test("should create patch for insertion at end", () => {
+      const patch = $Patch.createFromDiff("hello", "hello world");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello world");
+    });
+
+    test("should create patch for deletion at beginning", () => {
+      const patch = $Patch.createFromDiff("hello world", "world");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("world");
+    });
+
+    test("should create patch for deletion at end", () => {
+      const patch = $Patch.createFromDiff("hello world", "hello");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello");
+    });
+
+    test("should create patch for kitten -> sitting", () => {
+      const patch = $Patch.createFromDiff("kitten", "sitting");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("sitting");
+    });
+
+    test("should create patch for complex transformation", () => {
+      const patch = $Patch.createFromDiff(
+        "ABCDEFGHIJKLMNOP",
+        "A1B2C3DEFGHIJKLMNOP",
+      );
+      const result = $Patch.apply(patch);
+      expect(result).toBe("A1B2C3DEFGHIJKLMNOP");
+    });
+
+    test("should create patch for middle insertion", () => {
+      const patch = $Patch.createFromDiff("abc", "aXbc");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("aXbc");
+    });
+
+    test("should create patch for middle deletion", () => {
+      const patch = $Patch.createFromDiff("aXbc", "abc");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("abc");
+    });
+
+    test("should create patch for multiple operations", () => {
+      const before = "The quick brown fox";
+      const after = "A quick red fox jumps";
+      const patch = $Patch.createFromDiff(before, after);
+      const result = $Patch.apply(patch);
+      expect(result).toBe(after);
+    });
+
+    test("should handle single character strings", () => {
+      const patch = $Patch.createFromDiff("a", "b");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("b");
+    });
+
+    test("should handle repeated characters", () => {
+      const patch = $Patch.createFromDiff("aaa", "aaaa");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("aaaa");
+    });
+
+    test("should prefer retain operations when possible", () => {
+      const patch = $Patch.createFromDiff("hello world", "hello earth");
+      const result = $Patch.apply(patch);
+      expect(result).toBe("hello earth");
+
+      // Should retain "hello " and then handle the change
+      const hasRetain = patch.spans.some((span) => span.type === "retain");
+      expect(hasRetain).toBe(true);
+    });
+  });
 });

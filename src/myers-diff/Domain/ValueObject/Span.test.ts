@@ -2,6 +2,29 @@ import { describe, test, expect } from "bun:test";
 import { $Span, type Span, type SpanDto } from "./Span";
 
 describe("$Span", () => {
+  describe("create functions", () => {
+    test("createRetain should create frozen retain span", () => {
+      const span = $Span.createRetain(5);
+      expect(span).toEqual({ type: "retain", count: 5 });
+      expect(Object.isFrozen(span)).toBe(true);
+      expect($Span.isRetain(span)).toBe(true);
+    });
+
+    test("createDelete should create frozen delete span", () => {
+      const span = $Span.createDelete(3);
+      expect(span).toEqual({ type: "delete", count: 3 });
+      expect(Object.isFrozen(span)).toBe(true);
+      expect($Span.isDelete(span)).toBe(true);
+    });
+
+    test("createInsert should create frozen insert span", () => {
+      const span = $Span.createInsert("hello");
+      expect(span).toEqual({ type: "insert", text: "hello" });
+      expect(Object.isFrozen(span)).toBe(true);
+      expect($Span.isInsert(span)).toBe(true);
+    });
+  });
+
   describe("type guards", () => {
     test("isRetain should identify retain spans", () => {
       const span: Span = { type: "retain", count: 5 };
@@ -71,13 +94,9 @@ describe("$Span", () => {
 
   describe("roundtrip conversion", () => {
     test("DTO -> Domain -> DTO should be identical", () => {
-      const originalDtos: SpanDto[] = [
-        { r: 5 },
-        { d: 3 },
-        { i: "hello" }
-      ];
+      const originalDtos: SpanDto[] = [{ r: 5 }, { d: 3 }, { i: "hello" }];
 
-      originalDtos.forEach(dto => {
+      originalDtos.forEach((dto) => {
         const domain = $Span.fromDto(dto);
         const backToDto = $Span.toDto(domain);
         expect(backToDto).toEqual(dto);
@@ -88,10 +107,10 @@ describe("$Span", () => {
       const originalSpans: Span[] = [
         { type: "retain", count: 5 },
         { type: "delete", count: 3 },
-        { type: "insert", text: "hello" }
+        { type: "insert", text: "hello" },
       ];
 
-      originalSpans.forEach(span => {
+      originalSpans.forEach((span) => {
         const dto = $Span.toDto(span);
         const backToSpan = $Span.fromDto(dto);
         expect(backToSpan).toEqual(span);
