@@ -60,88 +60,75 @@ export const $Patch = {
   createFromDiff(before: string, after: string): Patch {
     function createDiffSpans(before: string, after: string): Span[] {
       const spans: Span[] = [];
-      let beforePos = 0;
-      let afterPos = 0;
-
-      // Simple approach: analyze character by character
-      while (beforePos < before.length || afterPos < after.length) {
-        if (beforePos >= before.length) {
-          // Only insertions left
-          spans.push($Span.createInsert(after.slice(afterPos)));
-          break;
-        } else if (afterPos >= after.length) {
-          // Only deletions left
-          spans.push($Span.createDelete(before.length - beforePos));
-          break;
-        } else if (before[beforePos] === after[afterPos]) {
-          // Characters match - retain
-          let retainCount = 1;
-          while (
-            beforePos + retainCount < before.length &&
-            afterPos + retainCount < after.length &&
-            before[beforePos + retainCount] === after[afterPos + retainCount]
-          ) {
-            retainCount++;
-          }
-          spans.push($Span.createRetain(retainCount));
-          beforePos += retainCount;
-          afterPos += retainCount;
-        } else {
-          // Characters don't match - find optimal operation
-          let deleteCount = 0;
-          let insertText = "";
-
-          // Look ahead to find next matching position
-          let found = false;
-
-          // Simple heuristic: look for next matching character within reasonable distance
-          for (
-            let lookAhead = 1;
-            lookAhead <=
-            Math.min(
-              10,
-              Math.max(before.length - beforePos, after.length - afterPos),
-            );
-            lookAhead++
-          ) {
-            // Try deletion
-            if (
-              beforePos + lookAhead < before.length &&
-              afterPos < after.length &&
-              before[beforePos + lookAhead] === after[afterPos]
-            ) {
-              deleteCount = lookAhead;
-              found = true;
-              break;
-            }
-            // Try insertion
-            if (
-              beforePos < before.length &&
-              afterPos + lookAhead < after.length &&
-              before[beforePos] === after[afterPos + lookAhead]
-            ) {
-              insertText = after.slice(afterPos, afterPos + lookAhead);
-              found = true;
-              break;
-            }
-          }
-
-          if (!found) {
-            // No nearby match found - replace one character
-            spans.push($Span.createDelete(1));
-            spans.push($Span.createInsert(after[afterPos]));
-            beforePos++;
-            afterPos++;
-          } else if (deleteCount > 0) {
-            spans.push($Span.createDelete(deleteCount));
-            beforePos += deleteCount;
-          } else if (insertText.length > 0) {
-            spans.push($Span.createInsert(insertText));
-            afterPos += insertText.length;
+      
+      // Use Longest Common Subsequence (LCS) approach for optimal diff
+      const n = before.length;
+      const m = after.length;
+      
+      // Create LCS table
+      const lcs: number[][] = Array(n + 1).fill(0).map(() => Array(m + 1).fill(0));
+      
+      for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= m; j++) {
+          if (before[i - 1] === after[j - 1]) {
+            lcs[i][j] = lcs[i - 1][j - 1] + 1;
+          } else {
+            lcs[i][j] = Math.max(lcs[i - 1][j], lcs[i][j - 1]);
           }
         }
       }
-
+      
+      // Backtrack to generate operations
+      let i = n, j = m;
+      const operations: { type: 'retain' | 'delete' | 'insert', count?: number, text?: string }[] = [];
+      
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && before[i - 1] === after[j - 1]) {
+          // Characters match
+          operations.unshift({ type: 'retain', count: 1 });
+          i--;
+          j--;
+        } else if (i > 0 && (j === 0 || lcs[i - 1][j] >= lcs[i][j - 1])) {
+          // Delete from before
+          operations.unshift({ type: 'delete', count: 1 });
+          i--;
+        } else {
+          // Insert from after
+          operations.unshift({ type: 'insert', text: after[j - 1] });
+          j--;
+        }
+      }
+      
+      // Merge consecutive operations of the same type
+      let k = 0;
+      while (k < operations.length) {
+        const op = operations[k];
+        
+        if (op.type === 'retain') {
+          let retainCount = op.count || 1;
+          while (k + 1 < operations.length && operations[k + 1].type === 'retain') {
+            retainCount += operations[k + 1].count || 1;
+            k++;
+          }
+          spans.push($Span.createRetain(retainCount));
+        } else if (op.type === 'delete') {
+          let deleteCount = op.count || 1;
+          while (k + 1 < operations.length && operations[k + 1].type === 'delete') {
+            deleteCount += operations[k + 1].count || 1;
+            k++;
+          }
+          spans.push($Span.createDelete(deleteCount));
+        } else if (op.type === 'insert') {
+          let insertText = op.text || '';
+          while (k + 1 < operations.length && operations[k + 1].type === 'insert') {
+            insertText += operations[k + 1].text || '';
+            k++;
+          }
+          spans.push($Span.createInsert(insertText));
+        }
+        k++;
+      }
+      
       return spans;
     }
 
