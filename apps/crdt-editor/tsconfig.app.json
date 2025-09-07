@@ -12,5 +12,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": [
+    "apps/crdt-editor/src/**/*.ts",
+    "apps/crdt-editor/src/**/*.tsx",
+    "apps/crdt-editor/src/**/*.vue"
+  ]
 }
