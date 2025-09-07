@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './pages/Home.vue';
-import MyersDiff from './pages/MyersDiff.vue';
+import TextDiff from './pages/TextDiff.vue';
 
 const routes = [
   {
@@ -9,9 +9,9 @@ const routes = [
     component: Home,
   },
   {
-    path: '/myers-diff',
-    name: 'MyersDiff',
-    component: MyersDiff,
+    path: '/text-diff',
+    name: 'TextDiff',
+    component: TextDiff,
   },
 ];
 

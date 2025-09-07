@@ -26,7 +26,7 @@ const patch = computed(() => {
     >
       <div class="mb-8 bg-white p-6 rounded-lg shadow-sm">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">
-          Myers Diff Algorithm Visualization
+          Text Diff Visualization (Myers Algorithm)
         </h1>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -63,7 +63,7 @@ const patch = computed(() => {
 
         <!-- Quick Examples -->
         <div class="mt-4">
-          <p class="text-sm text-gray-600 mb-2">Quick examples:</p>
+          <p class="text-sm text-gray-600 mb-2">Text sample examples:</p>
           <div class="flex flex-wrap gap-2">
             <button
               @click="

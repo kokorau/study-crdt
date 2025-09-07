@@ -13,9 +13,9 @@
           <div class="p-6 bg-blue-50 rounded-lg">
             <h2 class="text-xl font-semibold text-blue-800 mb-3">Features</h2>
             <ul class="space-y-2 text-blue-700">
-              <li>• Myers Diff Algorithm Visualization</li>
+              <li>• Text Diff Visualization (Myers Algorithm)</li>
               <li>• Real-time text comparison</li>
-              <li>• Interactive examples</li>
+              <li>• Interactive text samples</li>
               <li>• Visual edit operation tracking</li>
             </ul>
           </div>
@@ -26,10 +26,10 @@
               Use the sidebar to explore different tools and visualizations.
             </p>
             <router-link 
-              to="/myers-diff" 
+              to="/text-diff" 
               class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
             >
-              Try Myers Diff →
+              Try Text Diff →
             </router-link>
           </div>
         </div>
