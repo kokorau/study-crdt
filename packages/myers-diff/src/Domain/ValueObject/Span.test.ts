@@ -1,8 +1,19 @@
 import { describe, it, expect } from "bun:test";
-import { $Patch, $Span } from "./Span";
+import { $Span } from "./Span";
+import { $Patch } from "./Patch";
 import { Comparers } from "./Comparer";
 
 describe("Span", () => {
+  describe("文字列の比較", () => {
+    it("基本的な文字列差分", () => {
+      const patch = $Patch.createFromDiff("abc", "axc");
+      const result = $Patch.apply(patch);
+      
+      expect(result).toBe("axc");
+      expect($Patch.getEditDistance("abc", "axc")).toBe(2); // 1つの置換 = 削除1 + 挿入1
+    });
+  });
+
   describe("文字列配列の比較", () => {
     const comparer = Comparers.strict<string>();
 
@@ -11,7 +22,7 @@ describe("Span", () => {
       const after = ["a", "x", "c"];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual(after);
       
@@ -25,7 +36,7 @@ describe("Span", () => {
       const after = ["a", "b", "c", "d"];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual(after);
     });
@@ -35,7 +46,7 @@ describe("Span", () => {
       const after = ["a", "d"];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual(after);
     });
@@ -45,7 +56,7 @@ describe("Span", () => {
     type User = { id: string; name: string; age: number };
 
     it("IDによる比較", () => {
-      const comparer = Comparers.byField<User>("id");
+      const comparer = Comparers.byField<User, "id">("id");
       
       const before: User[] = [
         { id: "1", name: "Alice", age: 25 },
@@ -58,7 +69,7 @@ describe("Span", () => {
       ];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as User[];
       
       // IDが同じなので最初の要素は保持される（元のオブジェクトが残る）
       expect(result[0]).toEqual({ id: "1", name: "Alice", age: 25 });
@@ -79,7 +90,7 @@ describe("Span", () => {
       ];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as User[];
       
       expect(result).toEqual(after);
       // 年齢が変更されたので、削除＋挿入になる
@@ -96,7 +107,7 @@ describe("Span", () => {
       const after = ["a", 1, "c", 3];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as (string | number)[];
       
       expect(result).toEqual(after);
     });
@@ -122,7 +133,7 @@ describe("Span", () => {
       ];
       
       const patch = $Patch.createFromDiff(before, after, comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as Item[];
       
       // 最初の要素はtype+valueが同じなので保持される（元のmetadataが残る）
       expect(result[0].metadata?.created).toBe("2023-01-01");
@@ -136,7 +147,7 @@ describe("Span", () => {
 
     it("空配列から空配列", () => {
       const patch = $Patch.createFromDiff([], [], comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual([]);
       expect(patch.spans).toEqual([]);
@@ -144,14 +155,14 @@ describe("Span", () => {
 
     it("空配列から要素追加", () => {
       const patch = $Patch.createFromDiff([], ["a", "b"], comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual(["a", "b"]);
     });
 
     it("全削除", () => {
       const patch = $Patch.createFromDiff(["a", "b"], [], comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual([]);
     });
@@ -159,7 +170,7 @@ describe("Span", () => {
     it("同一配列", () => {
       const arr = ["a", "b", "c"];
       const patch = $Patch.createFromDiff(arr, [...arr], comparer);
-      const result = $Patch.apply(patch);
+      const result = $Patch.apply(patch) as string[];
       
       expect(result).toEqual(arr);
       expect(patch.spans).toEqual([$Span.createRetain(3)]);

@@ -21,11 +21,11 @@ pnpm install @study-crdt/myers-diff
 ### 基本的な使い方
 
 ```typescript
-import { $StringDiff, $Patch, Comparers } from '@study-crdt/myers-diff';
+import { $Patch, Comparers } from '@study-crdt/myers-diff';
 
 // 文字列の差分
-const stringPatch = $StringDiff.createFromDiff("kitten", "sitting");
-const result = $StringDiff.apply(stringPatch); // "sitting"
+const stringPatch = $Patch.createFromDiff("kitten", "sitting");
+const result = $Patch.apply(stringPatch); // "sitting"
 
 // 配列の差分
 const arrayPatch = $Patch.createFromDiff(
@@ -87,8 +87,8 @@ Comparers.auto<any>()
 
 ```typescript
 // 文字列の差分計算
-import { $StringDiff } from '@study-crdt/myers-diff';
-const patch = $StringDiff.createFromDiff("abc", "axc");
+import { $Patch } from '@study-crdt/myers-diff';
+const patch = $Patch.createFromDiff("abc", "axc");
 
 // 配列の差分計算
 import { $Patch, Comparers } from '@study-crdt/myers-diff';
@@ -97,17 +97,14 @@ const patch = $Patch.createFromDiff(array1, array2, comparer);
 
 ## 📖 API リファレンス
 
-### 文字列用API
+### 統一API
 
-- `$StringDiff.createFromDiff(before: string, after: string)` - 差分作成
-- `$StringDiff.apply(patch: StringPatch)` - パッチ適用
-- `$StringDiff.getEditDistance(before: string, after: string)` - 編集距離計算
-
-### 配列用API
-
-- `$Patch.createFromDiff<T>(before: T[], after: T[], comparer)` - 差分作成
-- `$Patch.apply<T>(patch: Patch<T>)` - パッチ適用
-- `$Patch.getEditDistance<T>(before: T[], after: T[], comparer)` - 編集距離計算
+- `$Patch.createFromDiff(before: string, after: string)` - 文字列差分作成
+- `$Patch.createFromDiff<T>(before: T[], after: T[], comparer)` - 配列差分作成
+- `$Patch.apply(patch: Patch<string>)` - 文字列パッチ適用
+- `$Patch.apply<T>(patch: Patch<T>)` - 配列パッチ適用
+- `$Patch.getEditDistance(before: string, after: string)` - 文字列編集距離
+- `$Patch.getEditDistance<T>(before: T[], after: T[], comparer)` - 配列編集距離
 
 ### 比較戦略
 

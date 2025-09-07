@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import VisualizeMyersDiff from "../components/MyersDiff/VisualizeMyersDiff.vue";
-import { $StringDiff } from "@study-crdt/myers-diff";
+import { $Patch, type Patch } from "@study-crdt/myers-diff";
 
 const before = ref("kitten");
 const after = ref("sitting");
 
 const patch = computed(() => {
   try {
-    return $StringDiff.createFromDiff(before.value, after.value);
+    return $Patch.createFromDiff(before.value, after.value) as Patch<string>;
   } catch (error) {
     console.error("Error creating patch:", error);
-    return $StringDiff.create({
-      baseVersion: before.value,
+    return $Patch.create({
+      baseVersion: before.value.split(""),
       spans: [],
-    });
+    }) as Patch<string>;
   }
 });
 </script>

@@ -1,16 +1,16 @@
 import { computed, type Ref } from "vue";
-import { type StringPatch, $StringDiff } from "@study-crdt/myers-diff";
+import { type Patch, $Patch } from "@study-crdt/myers-diff";
 import type { GridInfo, GridCell, EditStep, PathSegment } from "./diff";
 
-export function useDiffVisualization(patch: Ref<StringPatch>) {
+export function useDiffVisualization(patch: Ref<Patch<string>>) {
   // Apply patch to get the result string
   function applyPatch(): string {
-    return $StringDiff.apply(patch.value);
+    return $Patch.apply(patch.value) as string;
   }
 
   // Grid dimensions based on patch
   const gridInfo = computed<GridInfo>(() => {
-    const before = patch.value.baseVersion.join(""); // StringPatchは配列なので文字列に変換
+    const before = patch.value.baseVersion.join(""); // Patch<string>は配列なので文字列に変換
     const after = applyPatch();
     return {
       width: before.length,
@@ -41,7 +41,7 @@ export function useDiffVisualization(patch: Ref<StringPatch>) {
         // Don't add deleted content to result, just move position
         position += span.count;
       } else if (span.type === "insert") {
-        result += span.items.join(""); // StringPatchのitemsは配列
+        result += span.items.join(""); // Patch<string>のitemsは配列
       }
       results.push(result);
     }
@@ -52,7 +52,7 @@ export function useDiffVisualization(patch: Ref<StringPatch>) {
   // Get the text content for each operation (only the diff part)
   function getOperationDiff(span: any, index: number): string {
     if (span.type === "insert") {
-      return span.items.join(""); // StringPatchのitemsは配列
+      return span.items.join(""); // Patch<string>のitemsは配列
     } else if (span.type === "delete" || span.type === "retain") {
       let position = 0;
       const baseVersionString = patch.value.baseVersion.join("");
@@ -107,7 +107,7 @@ export function useDiffVisualization(patch: Ref<StringPatch>) {
           });
         }
       } else if (span.type === "insert") {
-        for (const char of span.items) { // StringPatchのitemsは配列
+        for (const char of span.items) { // Patch<string>のitemsは配列
           y++;
           path.push({
             x,

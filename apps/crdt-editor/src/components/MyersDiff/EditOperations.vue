@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { StringPatch } from "@study-crdt/myers-diff";
+import type { Patch } from "@study-crdt/myers-diff";
 
 interface Props {
-  patch: StringPatch;
+  patch: Patch<string>;
   intermediateResults: string[];
   getOperationDiff: (span: any, index: number) => string;
 }

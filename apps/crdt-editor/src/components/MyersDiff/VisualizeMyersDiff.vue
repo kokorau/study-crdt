@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { type StringPatch, $StringDiff } from "@study-crdt/myers-diff";
+import { type Patch, $Patch } from "@study-crdt/myers-diff";
 import { useDiffVisualization } from "./useDiffVisualization";
 import DiffGrid from "./DiffGrid.vue";
 import EditOperations from "./EditOperations.vue";
 
 interface Props {
-  patch?: StringPatch;
+  patch?: Patch<string>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   patch: () =>
-    $StringDiff.create({
-      baseVersion: "",
+    $Patch.create({
+      baseVersion: "".split(""),
       spans: [],
     }),
 });
@@ -20,8 +20,8 @@ const props = withDefaults(defineProps<Props>(), {
 // Safety check for patch
 const safePatch = computed(() => {
   if (!props.patch || !props.patch.baseVersion) {
-    return $StringDiff.create({
-      baseVersion: "",
+    return $Patch.create({
+      baseVersion: "".split(""),
       spans: [],
     });
   }
