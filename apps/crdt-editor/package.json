@@ -10,10 +10,11 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.13",
     "@study-crdt/myers-diff": "workspace:^",
+    "@tailwindcss/vite": "^4.1.13",
     "tailwindcss": "^4.1.13",
-    "vue": "^3.5.18"
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@types/bun": "^1.2.21",
