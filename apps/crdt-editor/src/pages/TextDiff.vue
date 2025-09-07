@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import VisualizeMyersDiff from "../components/MyersDiff/VisualizeMyersDiff.vue";
+import VisualizeTextDiff from "../components/TextDiff/VisualizeTextDiff.vue";
 import { $Patch, type Patch } from "@study-crdt/myers-diff";
 
 const before = ref("kitten");
@@ -113,7 +113,7 @@ const patch = computed(() => {
         </div>
       </div>
 
-      <VisualizeMyersDiff :patch="patch" />
+      <VisualizeTextDiff :patch="patch" />
     </div>
   </div>
 </template>
