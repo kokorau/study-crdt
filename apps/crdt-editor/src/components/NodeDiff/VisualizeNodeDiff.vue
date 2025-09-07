@@ -34,26 +34,118 @@ const structurePatch = computed(() => {
   }
 });
 
-// NodeContent用のcomparer - UUIDのみで同一性を判断
-const nodeContentComparer = Comparers.custom<NodeContent>((a, b) => {
-  return a.uuid === b.uuid;
-});
+// NodeContent個別差分計算
+type NodeContentDiff = {
+  uuid: string;
+  type: "added" | "deleted" | "modified" | "unchanged";
+  before?: NodeContent;
+  after?: NodeContent;
+  changes?: Array<{
+    property: string;
+    before: any;
+    after: any;
+  }>;
+};
 
-// コンテンツの差分を計算
-const contentPatch = computed(() => {
-  try {
-    return $Patch.createFromDiff(
-      props.diffData.before.nodeContentList,
-      props.diffData.after.nodeContentList,
-      nodeContentComparer,
-    ) as Patch<NodeContent>;
-  } catch (error) {
-    console.error("Error creating content patch:", error);
-    return $Patch.create({
-      baseVersion: props.diffData.before.nodeContentList,
-      spans: [],
-    }) as Patch<NodeContent>;
+const nodeContentDiffs = computed((): NodeContentDiff[] => {
+  const beforeMap = new Map<string, NodeContent>();
+  const afterMap = new Map<string, NodeContent>();
+
+  // マップを作成
+  props.diffData.before.nodeContentList.forEach((item) =>
+    beforeMap.set(item.uuid, item),
+  );
+  props.diffData.after.nodeContentList.forEach((item) =>
+    afterMap.set(item.uuid, item),
+  );
+
+  // 全UUIDを取得
+  const allUuids = new Set([...beforeMap.keys(), ...afterMap.keys()]);
+
+  const diffs: NodeContentDiff[] = [];
+
+  for (const uuid of allUuids) {
+    const before = beforeMap.get(uuid);
+    const after = afterMap.get(uuid);
+
+    if (!before && after) {
+      // 追加
+      diffs.push({ uuid, type: "added", after });
+    } else if (before && !after) {
+      // 削除
+      diffs.push({ uuid, type: "deleted", before });
+    } else if (before && after) {
+      // 変更チェック
+      const changes: Array<{ property: string; before: any; after: any }> = [];
+
+      // textContent比較
+      if (before.textContent !== after.textContent) {
+        changes.push({
+          property: "textContent",
+          before: before.textContent,
+          after: after.textContent,
+        });
+      }
+
+      // tagName比較
+      if (before.tagName !== after.tagName) {
+        changes.push({
+          property: "tagName",
+          before: before.tagName,
+          after: after.tagName,
+        });
+      }
+
+      // attrs.class比較
+      if (
+        JSON.stringify(before.attrs.class.sort()) !==
+        JSON.stringify(after.attrs.class.sort())
+      ) {
+        changes.push({
+          property: "class",
+          before: before.attrs.class,
+          after: after.attrs.class,
+        });
+      }
+
+      // attrs.id比較
+      if (before.attrs.id !== after.attrs.id) {
+        changes.push({
+          property: "id",
+          before: before.attrs.id,
+          after: after.attrs.id,
+        });
+      }
+
+      // style比較
+      if (JSON.stringify(before.style) !== JSON.stringify(after.style)) {
+        changes.push({
+          property: "style",
+          before: before.style,
+          after: after.style,
+        });
+      }
+
+      // attrs.data比較
+      if (
+        JSON.stringify(before.attrs.data) !== JSON.stringify(after.attrs.data)
+      ) {
+        changes.push({
+          property: "data",
+          before: before.attrs.data,
+          after: after.attrs.data,
+        });
+      }
+
+      if (changes.length > 0) {
+        diffs.push({ uuid, type: "modified", before, after, changes });
+      } else {
+        diffs.push({ uuid, type: "unchanged", before, after });
+      }
+    }
   }
+
+  return diffs.sort((a, b) => a.uuid.localeCompare(b.uuid));
 });
 
 // レンダリング用ツリー構築
@@ -67,26 +159,6 @@ const beforeHtml = computed(() =>
 const afterHtml = computed(() =>
   afterTree.value.map((node) => renderNodeToString(node)).join("\n"),
 );
-
-// 統計情報（実際の表示に合わせた数値）
-const structureChangesCount = computed(() => {
-  // NodeStructureDiffコンポーネントで処理された結果をカウントしたいが、
-  // 直接アクセスできないので、ここでは元のspanの数を使用
-  return structurePatch.value.spans.filter((span) => span.type !== "retain")
-    .length;
-});
-
-const contentChangesCount = computed(() => {
-  return contentPatch.value.spans.filter((span) => span.type !== "retain")
-    .length;
-});
-
-const totalNodes = computed(() => {
-  return Math.max(
-    props.diffData.before.nodeList.length,
-    props.diffData.after.nodeList.length,
-  );
-});
 
 // GitHub風差分統計
 const structureDiffSummary = computed(() => {
@@ -103,13 +175,13 @@ const structureDiffSummary = computed(() => {
 });
 
 const contentDiffSummary = computed(() => {
-  const spans = contentPatch.value.spans;
   let added = 0,
     deleted = 0;
 
-  spans.forEach((span) => {
-    if (span.type === "insert") added += span.items.length;
-    else if (span.type === "delete") deleted += span.count;
+  nodeContentDiffs.value.forEach((diff) => {
+    if (diff.type === "added") added++;
+    else if (diff.type === "deleted") deleted++;
+    else if (diff.type === "modified") added++; // 修正も変更として扱う
   });
 
   return { added, deleted };
@@ -197,11 +269,7 @@ const contentDiffSummary = computed(() => {
           >
         </div>
       </div>
-      <NodeContentDiff
-        :patch="contentPatch"
-        :before-node-content-list="diffData.before.nodeContentList"
-        :after-node-content-list="diffData.after.nodeContentList"
-      />
+      <NodeContentDiff :node-content-diffs="nodeContentDiffs" />
     </section>
   </div>
 </template>
