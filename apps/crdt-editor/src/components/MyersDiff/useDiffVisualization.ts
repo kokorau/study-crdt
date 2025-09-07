@@ -1,33 +1,16 @@
 import { computed, type Ref } from "vue";
-import type { Patch } from "@study-crdt/myers-diff";
+import { type StringPatch, $StringDiff } from "@study-crdt/myers-diff";
 import type { GridInfo, GridCell, EditStep, PathSegment } from "./diff";
 
-export function useDiffVisualization(patch: Ref<Patch>) {
+export function useDiffVisualization(patch: Ref<StringPatch>) {
   // Apply patch to get the result string
   function applyPatch(): string {
-    let result = "";
-    let position = 0;
-
-    for (const span of patch.value.spans) {
-      if (span.type === "retain") {
-        result += patch.value.baseVersion.slice(
-          position,
-          position + span.count,
-        );
-        position += span.count;
-      } else if (span.type === "delete") {
-        position += span.count;
-      } else if (span.type === "insert") {
-        result += span.text;
-      }
-    }
-
-    return result;
+    return $StringDiff.apply(patch.value);
   }
 
   // Grid dimensions based on patch
   const gridInfo = computed<GridInfo>(() => {
-    const before = patch.value.baseVersion;
+    const before = patch.value.baseVersion.join(""); // StringPatchは配列なので文字列に変換
     const after = applyPatch();
     return {
       width: before.length,
@@ -42,13 +25,14 @@ export function useDiffVisualization(patch: Ref<Patch>) {
     const results: string[] = [];
     let result = "";
     let position = 0;
+    const baseVersionString = patch.value.baseVersion.join("");
 
     // Initial state
     results.push("");
 
     for (const span of patch.value.spans) {
       if (span.type === "retain") {
-        result += patch.value.baseVersion.slice(
+        result += baseVersionString.slice(
           position,
           position + span.count,
         );
@@ -57,7 +41,7 @@ export function useDiffVisualization(patch: Ref<Patch>) {
         // Don't add deleted content to result, just move position
         position += span.count;
       } else if (span.type === "insert") {
-        result += span.text;
+        result += span.items.join(""); // StringPatchのitemsは配列
       }
       results.push(result);
     }
@@ -68,9 +52,10 @@ export function useDiffVisualization(patch: Ref<Patch>) {
   // Get the text content for each operation (only the diff part)
   function getOperationDiff(span: any, index: number): string {
     if (span.type === "insert") {
-      return span.text;
+      return span.items.join(""); // StringPatchのitemsは配列
     } else if (span.type === "delete" || span.type === "retain") {
       let position = 0;
+      const baseVersionString = patch.value.baseVersion.join("");
 
       // Calculate position up to current span
       for (let i = 0; i < index; i++) {
@@ -80,7 +65,7 @@ export function useDiffVisualization(patch: Ref<Patch>) {
         }
       }
 
-      return patch.value.baseVersion.slice(position, position + span.count);
+      return baseVersionString.slice(position, position + span.count);
     }
 
     return "";
@@ -88,7 +73,7 @@ export function useDiffVisualization(patch: Ref<Patch>) {
 
   // Calculate the edit path for visualization
   const editPath = computed<EditStep[]>(() => {
-    const before = patch.value.baseVersion;
+    const before = patch.value.baseVersion; // 既に配列形式
     const path: EditStep[] = [];
     let x = 0;
     let y = 0;
@@ -122,7 +107,7 @@ export function useDiffVisualization(patch: Ref<Patch>) {
           });
         }
       } else if (span.type === "insert") {
-        for (const char of span.text) {
+        for (const char of span.items) { // StringPatchのitemsは配列
           y++;
           path.push({
             x,

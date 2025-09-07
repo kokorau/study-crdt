@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { Patch } from "@study-crdt/myers-diff";
+import type { StringPatch } from "@study-crdt/myers-diff";
 
 interface Props {
-  patch: Patch;
+  patch: StringPatch;
   intermediateResults: string[];
   getOperationDiff: (span: any, index: number) => string;
 }
@@ -43,7 +43,7 @@ defineProps<Props>();
           {{ getOperationDiff(span, i) }}
         </span>
         <span v-else-if="span.type === 'insert'" class="text-blue-600">
-          +{{ span.text }}
+          +{{ span.items.join('') }}
         </span>
         <span class="text-gray-500">→</span>
         <span class="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
