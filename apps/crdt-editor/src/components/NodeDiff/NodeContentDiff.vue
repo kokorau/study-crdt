@@ -18,7 +18,7 @@ interface Props {
   nodeContentDiffs: NodeContentDiff[]
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const getOperationType = (type: 'added' | 'deleted' | 'modified' | 'unchanged') => {
   switch (type) {

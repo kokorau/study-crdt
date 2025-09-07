@@ -28,9 +28,6 @@ const getOperationType = (type: 'insert' | 'delete' | 'retain' | 'modify') => {
   }
 }
 
-const formatNodeItem = (item: NodeItem) => {
-  return `${item.uuid} (children: [${item.children.join(', ')}])`
-}
 
 // 削除+挿入のペアをModifyとして統合し、retain内の変更も検出
 const processedSpans = computed((): ProcessedSpan[] => {
