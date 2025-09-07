@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import type { Patch } from "../../myers-diff";
-import { $Patch } from "../../myers-diff";
+import type { Patch } from "@study-crdt/myers-diff";
+import { $Patch } from "@study-crdt/myers-diff";
 import { useDiffVisualization } from "./useDiffVisualization";
 import DiffGrid from "./DiffGrid.vue";
 import EditOperations from "./EditOperations.vue";

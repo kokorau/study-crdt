@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "@study-crdt/myers-diff": "workspace:^",
     "tailwindcss": "^4.1.13",
     "vue": "^3.5.18"
   },

@@ -1,13 +1,29 @@
 {
-  "name": "myers-diff",
+  "name": "@study-crdt/myers-diff",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Myers diff algorithm implementation",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "bun test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "@types/bun": "^1.2.21",
+    "tsup": "^8.0.0",
+    "typescript": "~5.8.3"
+  }
 }

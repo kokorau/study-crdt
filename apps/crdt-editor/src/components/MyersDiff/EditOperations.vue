@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Patch } from "../../myers-diff";
+import type { Patch } from "@study-crdt/myers-diff";
 
 interface Props {
   patch: Patch;
