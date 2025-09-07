@@ -3,18 +3,17 @@
   "version": "1.0.0",
   "description": "Myers diff algorithm implementation",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "npx tsgo -p . --declaration --outDir ./dist",
+    "dev": "npx tsgo -p . --declaration --outDir ./dist --watch",
     "test": "bun test"
   },
   "keywords": [],
@@ -23,7 +22,6 @@
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "@types/bun": "^1.2.21",
-    "tsup": "^8.0.0",
     "typescript": "~5.8.3"
   }
 }
