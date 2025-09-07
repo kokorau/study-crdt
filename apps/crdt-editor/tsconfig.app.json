@@ -13,8 +13,8 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "apps/crdt-editor/src/**/*.ts",
-    "apps/crdt-editor/src/**/*.tsx",
-    "apps/crdt-editor/src/**/*.vue"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
   ]
 }
