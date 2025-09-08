@@ -291,7 +291,7 @@ const samples = {
         },
         {
           uuid: "nav3",
-          textContent: "Navigation 3",
+          textContent: "Navigation 2",
           attrs: { data: {}, class: [], id: undefined },
           style: {}
         },
@@ -303,7 +303,7 @@ const samples = {
         },
         {
           uuid: "comments",
-          textContent: "Comments section",
+          textContent: "Article content",
           attrs: { data: {}, class: [], id: undefined },
           style: {}
         }

@@ -186,6 +186,26 @@ const contentDiffSummary = computed(() => {
 
   return { added, deleted };
 });
+
+// コピー機能
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    // TODO: 成功通知を表示
+  } catch (error) {
+    console.error("コピーに失敗しました:", error);
+  }
+};
+
+const copyStructureDiff = () => {
+  const diffText = JSON.stringify(structurePatch.value, null, 2);
+  copyToClipboard(diffText);
+};
+
+const copyContentDiff = () => {
+  const diffText = JSON.stringify(nodeContentDiffs.value, null, 2);
+  copyToClipboard(diffText);
+};
 </script>
 
 <template>
@@ -217,25 +237,34 @@ const contentDiffSummary = computed(() => {
     <section>
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-gray-800">Node Structure Diff</h2>
-        <div class="font-mono text-sm">
-          <span
-            v-if="structureDiffSummary.added > 0"
-            class="text-green-600 font-medium"
-            >+{{ structureDiffSummary.added }}</span
+        <div class="flex items-center gap-4">
+          <div class="font-mono text-sm">
+            <span
+              v-if="structureDiffSummary.added > 0"
+              class="text-green-600 font-medium"
+              >+{{ structureDiffSummary.added }}</span
+            >
+            <span
+              v-if="structureDiffSummary.deleted > 0"
+              class="text-red-600 font-medium"
+              >−{{ structureDiffSummary.deleted }}</span
+            >
+            <span
+              v-if="
+                structureDiffSummary.added === 0 &&
+                structureDiffSummary.deleted === 0
+              "
+              class="text-gray-500"
+              >No changes</span
+            >
+          </div>
+          <button
+            @click="copyStructureDiff"
+            class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300 transition-colors"
+            title="コピー"
           >
-          <span
-            v-if="structureDiffSummary.deleted > 0"
-            class="text-red-600 font-medium"
-            >−{{ structureDiffSummary.deleted }}</span
-          >
-          <span
-            v-if="
-              structureDiffSummary.added === 0 &&
-              structureDiffSummary.deleted === 0
-            "
-            class="text-gray-500"
-            >No changes</span
-          >
+            Copy
+          </button>
         </div>
       </div>
       <NodeStructureDiff
@@ -249,24 +278,34 @@ const contentDiffSummary = computed(() => {
     <section>
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-gray-800">Node Content Diff</h2>
-        <div class="font-mono text-sm">
-          <span
-            v-if="contentDiffSummary.added > 0"
-            class="text-green-600 font-medium"
-            >+{{ contentDiffSummary.added }}</span
+        <div class="flex items-center gap-4">
+          <div class="font-mono text-sm">
+            <span
+              v-if="contentDiffSummary.added > 0"
+              class="text-green-600 font-medium"
+              >+{{ contentDiffSummary.added }}</span
+            >
+            <span
+              v-if="contentDiffSummary.deleted > 0"
+              class="text-red-600 font-medium"
+              >−{{ contentDiffSummary.deleted }}</span
+            >
+            <span
+              v-if="
+                contentDiffSummary.added === 0 &&
+                contentDiffSummary.deleted === 0
+              "
+              class="text-gray-500"
+              >No changes</span
+            >
+          </div>
+          <button
+            @click="copyContentDiff"
+            class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300 transition-colors"
+            title="コピー"
           >
-          <span
-            v-if="contentDiffSummary.deleted > 0"
-            class="text-red-600 font-medium"
-            >−{{ contentDiffSummary.deleted }}</span
-          >
-          <span
-            v-if="
-              contentDiffSummary.added === 0 && contentDiffSummary.deleted === 0
-            "
-            class="text-gray-500"
-            >No changes</span
-          >
+            Copy
+          </button>
         </div>
       </div>
       <NodeContentDiff :node-content-diffs="nodeContentDiffs" />
