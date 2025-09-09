@@ -16,7 +16,7 @@ export type Patch<T> = {
 };
 
 export const $Patch = {
-  create<T>(patch: Patch<T>): Readonly<Patch<T>> {
+create<T>(patch: Patch<T>): Readonly<Patch<T>> {
     return Object.freeze({
       baseVersion: [...patch.baseVersion],
       spans: [...patch.spans],

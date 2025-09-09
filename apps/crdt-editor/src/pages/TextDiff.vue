@@ -7,15 +7,7 @@ const before = ref("kitten");
 const after = ref("sitting");
 
 const patch = computed(() => {
-  try {
-    return $Patch.createFromDiff(before.value, after.value) as Patch<string>;
-  } catch (error) {
-    console.error("Error creating patch:", error);
-    return $Patch.create({
-      baseVersion: before.value.split(""),
-      spans: [],
-    }) as Patch<string>;
-  }
+  return $Patch.createFromDiff(before.value, after.value) as Patch<string>;
 });
 </script>
 

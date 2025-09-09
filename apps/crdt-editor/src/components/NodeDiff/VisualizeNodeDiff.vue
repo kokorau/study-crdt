@@ -26,7 +26,6 @@ const structurePatch = computed(() => {
       nodeItemComparer,
     ) as Patch<NodeItem>;
   } catch (error) {
-    console.error("Error creating structure patch:", error);
     return $Patch.create({
       baseVersion: props.diffData.before.nodeList,
       spans: [],
@@ -193,7 +192,7 @@ const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
     // TODO: 成功通知を表示
   } catch (error) {
-    console.error("コピーに失敗しました:", error);
+    // コピーに失敗しました
   }
 };
 
